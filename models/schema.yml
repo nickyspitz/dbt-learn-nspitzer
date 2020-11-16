@@ -1,0 +1,39 @@
+version: 2
+
+models:
+  - name: customers
+    description: Customer list with basic order statistics
+    columns:
+      - name: customer_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: first_order_date
+        description: Date of first customer order; NULL when a customer has not yet placed an order.
+      - name: most_recent_order_date
+        description: Date of most recent customer order; NULL when a customer has not yet placed an order.
+      - name: number_of_orders
+        description: Total number of orders by customer. Can be 0.
+
+  - name: stg_customers
+    description: This model cleans up customer data. Row-level object is the customer
+    columns:
+      - name: customer_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_orders
+    description: This model cleans up order data. Row-level object is the order
+    columns:
+      - name: order_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['placed', 'shipped', 'completed', 'return_pending', 'returned']
