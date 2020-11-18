@@ -1,5 +1,18 @@
 version: 2
 
+sources:
+  - name: jaffle_shop
+    database: raw
+    tables:
+      - name: orders
+      - name: customers
+
+  - name: stripe
+    database: raw
+    tables:
+      - name: payments
+        identifier: payment
+
 models:
   - name: customers
     description: Customer list with basic order statistics
@@ -15,6 +28,25 @@ models:
         description: Date of most recent customer order; NULL when a customer has not yet placed an order.
       - name: number_of_orders
         description: Total number of orders by customer. Can be 0.
+
+      - name: total_lifetime_value_usd
+        description: Successful payments for all orders from customers
+
+  - name: stg_order_payments
+
+  - name: stg_payments
+    description: Payments staging table
+
+    columns:
+      - name: payment_id
+        description: Unique ID
+        
+      - name: order_id
+      - name: created_at
+      - name: current_status
+
+
+      - name: amount 
 
   - name: stg_customers
     description: This model cleans up customer data. Row-level object is the customer
