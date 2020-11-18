@@ -2,8 +2,8 @@ with
 customers as (
     select * from {{ ref('stg_customers') }}
 ),
-orders as (
-    select * from {{ ref('stg_orders') }}
+order_payments as (
+    select * from {{ ref('stg_order_payments') }}
 ),
 
 customer_orders as (
@@ -13,14 +13,14 @@ customer_orders as (
 
         min(order_date) as first_order_date,
         max(order_date) as most_recent_order_date,
-        count(order_id) as number_of_orders
+        coalesce(count(order_id),0) as number_of_orders,
+        sum(case when payment_status = 'success' then amount_usd else 0 end) as total_lifetime_value_usd
 
-    from orders
+    from order_payments
 
     group by 1
 
 ),
-
 
 final as (
 
@@ -28,9 +28,11 @@ final as (
         customers.customer_id,
         customers.first_name,
         customers.last_name,
+
         customer_orders.first_order_date,
         customer_orders.most_recent_order_date,
-        coalesce(customer_orders.number_of_orders, 0) as number_of_orders
+        customer_orders.total_lifetime_value_usd,
+        customer_orders.number_of_orders
 
     from customers
 
