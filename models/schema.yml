@@ -13,6 +13,55 @@ sources:
       - name: payments
         identifier: payment
 
+        # Note: the following freshness test requires some daily volume of payments!
+        loaded_at_field: "_batched_at::timestamp"
+        freshness: 
+          warn_after: {count: 12, period: hour}
+          error_after: {count: 24, period: hour}
+
+        columns:
+          - name: id
+            description: Unique ID of payment transaction
+            tests:
+              - unique
+              - not_null
+
+          - name: created
+            description: Date of payment transaction
+            tests:
+              - not_null
+
+          - name: orderid
+            description: Associated order ID for which payment was processed
+            tests:
+              - not_null
+              - relationships:
+                  to: source('jaffel_store', 'orders')
+                  field: id
+
+          - name: status
+            description: Payment status indicating a successful payment
+            tests:
+              - accepted_values:
+                  values: ['fail', 'success']
+          
+          - name: paymentmethod
+            description: Payment method used
+            tests:
+              - accepted_values:
+                  values:
+                    - credit_card
+                    - coupon
+                    - bank_transfer
+                    - gift_card
+          
+          - name: amount
+            description: Payment amount in USD * 100 (integer)
+            tests:
+              - not_null
+              # - greater_than_zero -- TODO
+
+
 models:
   - name: customers
     description: Customer list with basic order statistics
